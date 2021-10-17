@@ -1,15 +1,16 @@
 const jwt = require('jsonwebtoken');
 const UserService = require('./../service/user');
 
+const userService = new UserService();
+
 class TokenService {
     constructor( email="" ) {
         this.email = email;
     }
 
     // get jwt token
-    getToken = async () => {
-        const userService = new UserService(this.email);
-        const userId = await userService.getId();
+    getToken = async (email) => {
+        const userId = await userService.getId(email);
         console.log('getToken userId: ', userId);
         return jwt.sign({email: this.email, id: userId}, '1234567890');
     }

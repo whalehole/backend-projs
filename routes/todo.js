@@ -5,19 +5,21 @@ const TodoService = require('./../service/todo');
 const UserService = require('../service/user');
 const Rabbit = require('./../service/amqplib');
 
+const tokenService = new TokenService();
+const userService = new UserService();
+const todoService = new TodoService();
+const rabbit = new Rabbit();
+
 // CREATE TODO LIST
 router.post('/', async (req, res)=>{
     if (!req.body.title)
         res.status(400).send({status: 'Pls provide a title'});
-    const tokenService = new TokenService();
+
     const user = tokenService.verifyToken(req.headers.authorization);
     if (!user)
         res.send(401).send({status: 'User is unauthorized'});
 
-    const userService = new UserService(user['email']);
-    const todoService = new TodoService(await userService.getId());
-
-    const todolist = await todoService.create(req.body.title);
+    const todolist = await todoService.create(req.body.title, await userService.getId(user['email']));
     if (!todolist) 
         res.status(500).send({status: 'Failed to create list'});
     else
@@ -26,14 +28,11 @@ router.post('/', async (req, res)=>{
 
 // GET ALL TODOLISTS THAT IS ACCESSIBLE TO THE AUTHENTICATED USER
 router.get('/', async (req, res)=>{
-    const tokenService = new TokenService();
     const user = tokenService.verifyToken(req.headers.authorization);
     if (!user)
         res.send(401).send({status: 'User is unauthorized'});
 
-    const userService = new UserService(user['email']);
-    const userId = await userService.getId();
-    const todoService = new TodoService(userId, req.params.id);
+    const userId = await userService.getId(user['email']);
 
     const todolist = await todoService.getAllByUser(userId);
     if (todolist.length === 0) 
@@ -44,16 +43,13 @@ router.get('/', async (req, res)=>{
 
 // GET ALL TODOS OF A TODOLIST, FORBIDDEN IF RESTRICTED ACCESS
 router.get('/:id/todos', async (req, res)=>{
-    const tokenService = new TokenService();
     const user = tokenService.verifyToken(req.headers.authorization);
     if (!user)
         res.send(401).send({status: 'User is unauthorized'});
 
-    const userService = new UserService(user['email']);
-    const userId = await userService.getId();
-    const todoService = new TodoService(userId, req.params.id);
+    const userId = await userService.getId(user['email']);
 
-    if (!(await todoService.isOwner()) && !(await todoService.isSharedTo(userId)))
+    if (!(await todoService.isOwner(userId, req.params.id)) && !(await todoService.isSharedTo(userId, req.params.id)))
         res.status(403).send({status: 'User is forbidden'});
 
     const todos = await todoService.getListTodos(req.params.id);
@@ -67,16 +63,14 @@ router.get('/:id/todos', async (req, res)=>{
 router.put('/:id', async (req, res)=>{
     if (!req.body.title)
         res.status(400).send({status: "Pls provide a title"});
-    const tokenService = new TokenService();
+
     const user = tokenService.verifyToken(req.headers.authorization);
     if (!user)
         res.send(401).send({status: 'User is unauthorized'});
 
-    const userService = new UserService(user['email']);
-    const userId = await userService.getId();
-    const todoService = new TodoService(userId, req.params.id);
+    const userId = await userService.getId(user['email']);
 
-    if (!(await todoService.isOwner()) && !(await todoService.isSharedTo(userId)))
+    if (!(await todoService.isOwner(userId, req.params.id)) && !(await todoService.isSharedTo(userId, req.params.id)))
         res.status(403).send({status: 'User is forbidden'});
     else {
         const todolist = await todoService.updateListTitle(req.params.id, req.body.title);
@@ -88,17 +82,13 @@ router.put('/:id', async (req, res)=>{
 
 // DELETE A TODOLIST
 router.delete('/:id', async (req, res)=>{
-    const tokenService = new TokenService();
     const user = tokenService.verifyToken(req.headers.authorization);
     if (!user)
         res.status(401).send({status: 'User is unauthorized'});
 
-    const userService = new UserService(user['email']);
-    const listOwnerId = await userService.getId();
+    const userId = await userService.getId(user['email']);
 
-    console.log('listid: ', req.params.id);
-    const todoService = new TodoService(listOwnerId, req.params.id);
-    if (!(await todoService.isOwner()))
+    if (!(await todoService.isOwner(userId, req.params.id)))
         res.status(403).send({status: 'User is forbidden'});
     else {
         await todoService.delete();
@@ -110,16 +100,14 @@ router.delete('/:id', async (req, res)=>{
 router.post('/:id', async (req, res)=>{
     if (!req.body.todo) 
         res.status(400).send({status: 'Pls provide a todo'});
-    const tokenService = new TokenService();
+
     const user = tokenService.verifyToken(req.headers.authorization);
     if (!user)
         res.status(401).send({status: 'User is unauthorized'});
 
-    const userService = new UserService(user['email']);
-    const userId = await userService.getId();
-    const todoService = new TodoService(userId, req.params.id);
+    const userId = await userService.getId(user['email']);
 
-    if (!(await todoService.isOwner()) && !(await todoService.isSharedTo(userId)))
+    if (!(await todoService.isOwner(userId, req.params.id)) && !(await todoService.isSharedTo(userId, req.params.id)))
         res.status(403).send({status: 'User is forbidden'});
     else {
         const todo = await todoService.createTodo(req.params.id, userId, req.body.todo);
@@ -131,16 +119,14 @@ router.post('/:id', async (req, res)=>{
 router.put('/:listid/todos/:todoid', async (req, res)=>{
     if (!req.body.todo) 
         res.status(400).send({status: 'Pls provide a todo'});
-    const tokenService = new TokenService();
+
     const user = tokenService.verifyToken(req.headers.authorization);
     if (!user)
         res.send(401).send({status: 'User is unauthorized'});
 
-    const userService = new UserService(user['email']);
-    const userId = await userService.getId();
-    const todoService = new TodoService(userId, req.params.listid);
+    const userId = await userService.getId(user['email']);
 
-    if (!(await todoService.isOwner()) && !(await todoService.isSharedTo(userId)))
+    if (!(await todoService.isOwner(userId, req.params.listid)) && !(await todoService.isSharedTo(userId, req.params.listid)))
         res.status(403).send({status: 'User is forbidden'});
     else {
         const todo = await todoService.updateListTodo(req.params.listid, req.params.todoid, req.body.todo);
@@ -152,16 +138,13 @@ router.put('/:listid/todos/:todoid', async (req, res)=>{
 
 // DELETE A TODO OF A TODOLIST
 router.delete('/:listid/todos/:todoid', async (req, res)=>{
-    const tokenService = new TokenService();
     const user = tokenService.verifyToken(req.headers.authorization);
     if (!user)
         res.send(401).send({status: 'User is unauthorized'});
 
-    const userService = new UserService(user['email']);
-    const userId = await userService.getId();
-    const todoService = new TodoService(userId, req.params.listid);
+    const userId = await userService.getId(user['email']);
 
-    if (!(await todoService.isOwner()) && !(await todoService.isSharedTo(userId)))
+    if (!(await todoService.isOwner(userId, req.params.listid)) && !(await todoService.isSharedTo(userId, req.params.listid)))
         res.status(403).send({status: 'User is forbidden'});
     else {
         const todo = await todoService.deleteListTodo(req.params.listid, req.params.todoid);
@@ -173,20 +156,15 @@ router.delete('/:listid/todos/:todoid', async (req, res)=>{
 
 // GIVE ACCESS TO ANOTHER USER TO A TODOLIST
 router.post('/:listid/adduser/:userid', async (req, res)=>{
-    const tokenService = new TokenService();
     const user = tokenService.verifyToken(req.headers.authorization);
     if (!user)
         res.status(401).send({status: 'User is unauthorized'});
 
-    const userService = new UserService(user['email']);
-    const listOwnerId = await userService.getId();
+    const userId = await userService.getId(user['email']);
 
-    console.log('listid: ', req.params.listid);
-    const todoService = new TodoService(listOwnerId, req.params.listid);
-    if (!(await todoService.isOwner()))
+    if (!(await todoService.isOwner(userId, req.params.listid)))
         res.status(403).send({status: 'User is forbidden'});
     else {
-        const rabbit = new Rabbit();
         console.log(await rabbit.publish('todolist_user', {listId: req.params.listid, userId: req.params.userid}));
         res.status(200).send({status: 'User is given access to the todolist'});
     }

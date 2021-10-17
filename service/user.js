@@ -6,8 +6,8 @@ class UserService {
         this.userSub = userSub;
     }
     // check if user exists in the db
-    isExist = () => 
-        pool.query(`SELECT * FROM public.user WHERE email = $1 AND is_deleted = false`, [this.userEmail])
+    isExist = (userEmail) => 
+        pool.query(`SELECT * FROM public.user WHERE email = $1 AND is_deleted = false`, [userEmail])
         .then(result => {
             console.log(result.rows);
             if (result.rows.length !== 0)
@@ -17,8 +17,8 @@ class UserService {
         .catch(err => console.log(err.stack));
     
     // check if user password is correct
-    isAuthenticated = (password) => 
-        pool.query(`SELECT password FROM public.user WHERE email = $1 AND is_deleted = false`, [this.userEmail])
+    isAuthenticated = (userEmail, password) => 
+        pool.query(`SELECT password FROM public.user WHERE email = $1 AND is_deleted = false`, [userEmail])
         .then(result => {
             console.log(result.rows);
             const pw = result.rows[0]['password'];
@@ -29,8 +29,8 @@ class UserService {
         .catch(err => console.log(err.stack));
 
     // get user id
-    getId = () => 
-        pool.query(`SELECT id FROM public.user WHERE email = $1 AND is_deleted = false`, [this.userEmail])
+    getId = (userEmail) => 
+        pool.query(`SELECT id FROM public.user WHERE email = $1 AND is_deleted = false`, [userEmail])
         .then(result => {
             console.log('userId: ', result.rows[0]['id']);
             return result.rows[0]['id'];

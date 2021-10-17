@@ -6,16 +6,16 @@ class Todolist {
         this.userId = parseInt(userId);
     }
 
-    create = (title) => 
-        pool.query(`INSERT INTO public.todo_list(owner_id, title) VALUES($1, $2) RETURNING *`, [this.userId, title])
+    create = (title, userId) => 
+        pool.query(`INSERT INTO public.todo_list(owner_id, title) VALUES($1, $2) RETURNING *`, [parseInt(userId), parseInt(title)])
         .then(result => {
             console.log(result.rows);
             return result.rows;
         })
         .catch(err => console.log(err.stack));
 
-    isOwner = () => 
-        pool.query(`SELECT * FROM public.todo_list WHERE owner_id = $1 AND id = $2`, [this.userId, this.listId])
+    isOwner = (userId, listId) => 
+        pool.query(`SELECT * FROM public.todo_list WHERE owner_id = $1 AND id = $2`, [parseInt(userId), parseInt(listId)])
         .then(result => {
             console.log('Is Owner:', result.rows.length);
             if (result.rows.length !== 0)
@@ -32,16 +32,16 @@ class Todolist {
         })
         .catch(err => console.log(err.stack));
 
-    delete = () =>
-        pool.query(`UPDATE public.todo_list SET is_deleted = true WHERE id = $1 RETURNING *`, [this.listId])
+    delete = (listId) =>
+        pool.query(`UPDATE public.todo_list SET is_deleted = true WHERE id = $1 RETURNING *`, [parseInt(listId)])
         .then(result => {
             console.log(result.rows);
             return result.rows;
         })
         .catch(err => console.log(err.stack));
 
-    isSharedTo = (userid) => 
-        pool.query(`SELECT * FROM public.todolist_user_mapping WHERE todo_list_id = $1 AND user_id = $2 AND is_deleted = false`, [this.listId, parseInt(userid)])
+    isSharedTo = (userid, listId) => 
+        pool.query(`SELECT * FROM public.todolist_user_mapping WHERE todo_list_id = $1 AND user_id = $2 AND is_deleted = false`, [parseInt(listId), parseInt(userid)])
         .then(result => {
             console.log('Is Shared To:', result.rows.length);
             if (result.rows.length !== 0)
