@@ -7,7 +7,7 @@ class Todolist {
     }
 
     create = (title, userId) => 
-        pool.query(`INSERT INTO public.todo_list(owner_id, title) VALUES($1, $2) RETURNING *`, [parseInt(userId), parseInt(title)])
+        pool.query(`INSERT INTO public.todo_list(owner_id, title) VALUES($1, $2) RETURNING *`, [parseInt(userId), title])
         .then(result => {
             console.log(result.rows);
             return result.rows;
@@ -67,7 +67,7 @@ class Todolist {
         .catch(err => console.log(err.stack));
 
     getListTodos = (listid) =>
-        pool.query(`SELECT * FROM public.todo WHERE list_id = $1 AND is_deleted = false`, [parseInt(listid)])
+        pool.query(`SELECT * FROM public.todo WHERE list_id IN (SELECT id FROM public.todo_list WHERE id = $1 AND is_deleted = false) AND is_deleted = false`, [parseInt(listid)])
         .then(result => {
             console.log(result.rows);
             return result.rows;

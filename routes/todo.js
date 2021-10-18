@@ -54,7 +54,7 @@ router.get('/:id/todos', async (req, res)=>{
 
     const todos = await todoService.getListTodos(req.params.id);
     if (todos.length === 0) 
-        res.status(200).send({status: 'Todo list has no todos'});
+        res.status(200).send({status: 'Todo list has no todos, or list has been deleted'});
     else
         res.status(200).send({status: 'Todo list has todos', todos: todos});
 })
