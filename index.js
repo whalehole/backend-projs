@@ -11,11 +11,9 @@ app.use(express.urlencoded({ extended: false }))
 const register = require('./routes/register');
 const login = require('./routes/login');
 const todo = require('./routes/todo');
-const home = require('./routes/home');
 app.use('/register', register);
 app.use('/login', login);
 app.use('/todo', todo);
-app.use('/', home);
 
 consumer();
 
