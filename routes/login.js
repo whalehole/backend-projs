@@ -8,7 +8,6 @@ const tokenService = new TokenService();
 
 // LOGIN USER
 router.get('/', async (req, res)=>{
-
     const userIsExist = await userService.isExist(req.body.email);
     if (!userIsExist)
         res.status(400).send({status: 'User does not exist', token: null});

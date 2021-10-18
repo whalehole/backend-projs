@@ -36,6 +36,19 @@ class UserService {
             return result.rows[0]['id'];
         })
         .catch(err => console.log(err.stack));
+    
+    // create user
+    create = (email, password) =>
+        pool.query(`INSERT INTO users(email, password) VALUES($1, $2) RETURNING *`, [email, password])
+        .then(result => {
+            console.log('Account created!');
+            console.log(result.rows);
+            return result.rows[0];
+        })
+        .catch(err => {
+            console.log(err.stack);
+            return err;
+        });
 }
 
 module.exports = UserService;
