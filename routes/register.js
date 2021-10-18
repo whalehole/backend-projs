@@ -6,7 +6,7 @@ const UserService = require('./../service/user');
 const userService = new UserService();
 
 // CREATE NEW USER
-router.post('/', (req, res)=>{
+router.post('/', async (req, res)=>{
     const user = await userService.create(req.body.email, req.body.password);
     res.send(user);
 })
