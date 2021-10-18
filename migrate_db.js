@@ -1,6 +1,6 @@
 const pool = require('./db/pool');
 
-pool.query(`CREATE TABLE public.user (
+pool.query(`CREATE TABLE user (
 	id BIGSERIAL PRIMARY KEY,
 	email VARCHAR(100) NOT NULL UNIQUE,
 	password VARCHAR(50) NOT NULL,
@@ -10,7 +10,7 @@ pool.query(`CREATE TABLE public.user (
 );`);
 
 
-pool.query(`CREATE TABLE public.todo_list (
+pool.query(`CREATE TABLE todo_list (
     id BIGSERIAL PRIMARY KEY,
     owner_id BIGINT NOT NULL,
     title VARCHAR(100) NOT NULL,
@@ -23,7 +23,7 @@ pool.query(`CREATE TABLE public.todo_list (
             ON DELETE CASCADE
 );`);
 
-pool.query(`CREATE TABLE public.todo (
+pool.query(`CREATE TABLE todo (
     id BIGSERIAL PRIMARY KEY,
     list_id BIGINT NOT NULL,
     author_id BIGINT NOT NULL,
@@ -40,7 +40,7 @@ pool.query(`CREATE TABLE public.todo (
             ON DELETE CASCADE
 );`);
 
-pool.query(`CREATE TABLE public.todolist_user_mapping (
+pool.query(`CREATE TABLE todolist_user_mapping (
     user_id BIGINT NOT NULL,
     todo_list_id BIGINT NOT NULL,
     added_date DATE NOT NULL DEFAULT CURRENT_DATE,
