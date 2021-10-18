@@ -19,7 +19,7 @@ pool.query(`CREATE TABLE todo_list (
     is_deleted BOOLEAN DEFAULT false,
     CONSTRAINT fk_owner_id
         FOREIGN KEY(owner_id)
-            REFERENCES public.user(id)
+            REFERENCES user(id)
             ON DELETE CASCADE
 );`);
 
@@ -32,11 +32,11 @@ pool.query(`CREATE TABLE todo (
     is_deleted BOOLEAN DEFAULT false,
     CONSTRAINT fk_list_id
         FOREIGN KEY(list_id)
-            REFERENCES public.todo_list(id)
+            REFERENCES todo_list(id)
             ON DELETE CASCADE,
     CONSTRAINT fk_author_id
         FOREIGN KEY(author_id)
-            REFERENCES public.user(id)
+            REFERENCES user(id)
             ON DELETE CASCADE
 );`);
 
@@ -48,10 +48,10 @@ pool.query(`CREATE TABLE todolist_user_mapping (
     PRIMARY KEY(user_id, todo_list_id),
     CONSTRAINT fk_user
         FOREIGN KEY(user_id)
-            REFERENCES public.user(id)
+            REFERENCES user(id)
             ON DELETE CASCADE,
     CONSTRAINT fk_todo_list
         FOREIGN KEY(todo_list_id)
-            REFERENCES public.todo_list(id)
+            REFERENCES todo_list(id)
             ON DELETE CASCADE
 );`);
