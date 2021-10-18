@@ -54,3 +54,5 @@ pool.query(`CREATE TABLE todolist_user_mapping (
             REFERENCES "todo_list"(id)
             ON DELETE CASCADE
 );`);
+
+// test
