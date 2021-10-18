@@ -1,6 +1,6 @@
 const pool = require('./db/pool');
 
-pool.query(`CREATE TABLE user (
+pool.query(`CREATE TABLE users (
 	id BIGSERIAL PRIMARY KEY,
 	email VARCHAR(100) NOT NULL UNIQUE,
 	password VARCHAR(50) NOT NULL,
@@ -8,7 +8,6 @@ pool.query(`CREATE TABLE user (
     created_date DATE NOT NULL DEFAULT CURRENT_DATE,
     is_deleted BOOLEAN DEFAULT false
 );`);
-
 
 pool.query(`CREATE TABLE todo_list (
     id BIGSERIAL PRIMARY KEY,
@@ -19,7 +18,7 @@ pool.query(`CREATE TABLE todo_list (
     is_deleted BOOLEAN DEFAULT false,
     CONSTRAINT fk_owner_id
         FOREIGN KEY(owner_id)
-            REFERENCES user(id)
+            REFERENCES users(id)
             ON DELETE CASCADE
 );`);
 
@@ -36,7 +35,7 @@ pool.query(`CREATE TABLE todo (
             ON DELETE CASCADE,
     CONSTRAINT fk_author_id
         FOREIGN KEY(author_id)
-            REFERENCES user(id)
+            REFERENCES users(id)
             ON DELETE CASCADE
 );`);
 
@@ -48,7 +47,7 @@ pool.query(`CREATE TABLE todolist_user_mapping (
     PRIMARY KEY(user_id, todo_list_id),
     CONSTRAINT fk_user
         FOREIGN KEY(user_id)
-            REFERENCES user(id)
+            REFERENCES users(id)
             ON DELETE CASCADE,
     CONSTRAINT fk_todo_list
         FOREIGN KEY(todo_list_id)

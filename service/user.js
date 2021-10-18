@@ -7,7 +7,7 @@ class UserService {
     }
     // check if user exists in the db
     isExist = (userEmail) => 
-        pool.query(`SELECT * FROM public.user WHERE email = $1 AND is_deleted = false`, [userEmail])
+        pool.query(`SELECT * FROM users WHERE email = $1 AND is_deleted = false`, [userEmail])
         .then(result => {
             console.log(result.rows);
             if (result.rows.length !== 0)
@@ -18,7 +18,7 @@ class UserService {
     
     // check if user password is correct
     isAuthenticated = (userEmail, password) => 
-        pool.query(`SELECT password FROM public.user WHERE email = $1 AND is_deleted = false`, [userEmail])
+        pool.query(`SELECT password FROM users WHERE email = $1 AND is_deleted = false`, [userEmail])
         .then(result => {
             console.log(result.rows);
             const pw = result.rows[0]['password'];
@@ -30,7 +30,7 @@ class UserService {
 
     // get user id
     getId = (userEmail) => 
-        pool.query(`SELECT id FROM public.user WHERE email = $1 AND is_deleted = false`, [userEmail])
+        pool.query(`SELECT id FROM users WHERE email = $1 AND is_deleted = false`, [userEmail])
         .then(result => {
             console.log('userId: ', result.rows[0]['id']);
             return result.rows[0]['id'];
