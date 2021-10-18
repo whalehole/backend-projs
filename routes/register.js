@@ -8,7 +8,7 @@ const userService = new UserService();
 // CREATE NEW USER
 router.post('/', async (req, res)=>{
     const user = await userService.create(req.body.email, req.body.password);
-    res.send(user);
+    return res.send(user);
 })
 
 module.exports = router;
