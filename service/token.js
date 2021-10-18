@@ -1,3 +1,4 @@
+require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const UserService = require('./../service/user');
 
@@ -9,14 +10,14 @@ class TokenService {
     }
 
     // get jwt token
-    getToken = async (email) => {
-        const userId = await userService.getId(email);
+    getToken = async (userEmail) => {
+        const userId = await userService.getId(userEmail);
         console.log('getToken userId: ', userId);
-        return jwt.sign({email: this.email, id: userId}, '1234567890');
+        return jwt.sign({email: userEmail, id: userId}, process.env.JWTSECRET);
     }
 
     verifyToken = (token) => 
-        jwt.verify(token.split(' ')[1], '1234567890', (err, decoded) => {
+        jwt.verify(token.split(' ')[1], process.env.JWTSECRET, (err, decoded) => {
             if (err)
                 console.log(err.stack);
             console.log('Decoded Token: ', decoded);

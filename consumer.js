@@ -1,7 +1,8 @@
+require('dotenv').config();
 const amqp = require('amqplib/callback_api');
 const TodoService = require('./service/todo');
 
-const consumer = () => amqp.connect('amqp://localhost:5672', function(error0, connection) {
+const consumer = () => amqp.connect(process.env.AMQPSHOST || 'amqp://localhost:5672', function(error0, connection) {
     if (error0) {
         throw error0;
     }
